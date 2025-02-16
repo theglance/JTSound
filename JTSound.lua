@@ -49,13 +49,13 @@ function events:ADDON_LOADED(...)
 			
 			--load SavedVariables
 			
-			JTSDB.currentSP = JTSDB.currentSP == "JTSound" and addonName or (C_AddOns.IsAddOnLoaded(JTSDB.currentSP) and JTSDB.currentSP or addonName)
+			JTSDB.currentSP = JTSDB.currentSP == "JTSound" and addonName or (IsAddOnLoaded(JTSDB.currentSP) and JTSDB.currentSP or addonName)
 			JTS.addonPath = JTSDB.currentSP 
 
 			JTS.isCounting = JTSDB.isCounting
 			JTS.Debug = JTSDB.isDebugging or false
 
-			JTS.soundPackList[addonName] = {
+			JTS.soundPackList[addonName] = { 
 				name = soundPackName,
 				version = C_AddOns.GetAddOnMetadata(addonName, 'Version') or 0
 			}
@@ -90,7 +90,7 @@ end
 JTS_RefreshSoundPackList = JTS_RefreshSoundPackList or function()
 	local count = 0
 	for k, _ in pairs(JTS.soundPackList) do
-		if not C_AddOns.IsAddOnLoaded(k) then 
+		if not IsAddOnLoaded(k) then 
 			JTS.soundPackList[k] = nil
 		else
 			count = count + 1
