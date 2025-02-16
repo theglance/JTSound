@@ -1,0 +1,12 @@
+## Interface: 30403
+## Author: Jettie
+## Title: JTSound
+## Notes: |CFF666666By Jettie@SMTH|R|NJettie's Soundpack for JT WA series.
+## Title-zhCN: [|CFFFF53A2JT|R]语音包|CFFFF53A2JTS|R - |CFF8FFFA2JT系列WA|R
+## Notes-zhCN: |CFF666666By Jettie@SMTH|R|N|CFF33AAFFJTSound|R|N|CFF8FFFA2都是为了支持WA所需的语音文件|N插件不需要设置
+## X-SoundPackName: JT默认语音包
+
+## Version: 14
+## SavedVariables: JTSDB
+
+JTSound.lua
