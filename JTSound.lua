@@ -1,7 +1,8 @@
 local _G = getfenv(0)
 local addonName, addonTable = ...
 
-local soundPackName = GetAddOnMetadata(addonName, 'X-SoundPackName')
+local soundPackName = C_AddOns.GetAddOnMetadata(addonName, 'X-SoundPackName')
+local version = tonumber(C_AddOns.GetAddOnMetadata(addonName, 'Version')) or 999
 
 JTS = JTS or {}
 JTS.DefaultSoundPack = "JTSound"
@@ -10,7 +11,7 @@ JTS.Spam = {}
 
 JTS.soundPack = JTS.soundPack or false
 JTS.SPCount = 9
-JTS.version = (tonumber(JTS.version) and tonumber(GetAddOnMetadata(addonName, 'Version'))) and ( tonumber(JTS.version) >= tonumber(GetAddOnMetadata(addonName, 'Version')) and JTS.version or GetAddOnMetadata(addonName, 'Version') ) or (tonumber(JTS.version) and JTS.version or (tonumber(GetAddOnMetadata(addonName, 'Version')) and GetAddOnMetadata(addonName, 'Version') or "999"))
+JTS.version = (JTS.version and version) and ( JTS.version >= version and JTS.version or version ) or (JTS.version or (version and version or 999))
 
 JTS.addonPath = addonName
 JTS.alertNewVersion = JTS.alertNewVersion == nil or true
@@ -48,7 +49,7 @@ function events:ADDON_LOADED(...)
 			
 			--load SavedVariables
 			
-			JTSDB.currentSP = JTSDB.currentSP == "JTSound" and addonName or (IsAddOnLoaded(JTSDB.currentSP) and JTSDB.currentSP or addonName)
+			JTSDB.currentSP = JTSDB.currentSP == "JTSound" and addonName or (C_AddOns.IsAddOnLoaded(JTSDB.currentSP) and JTSDB.currentSP or addonName)
 			JTS.addonPath = JTSDB.currentSP 
 
 			JTS.isCounting = JTSDB.isCounting
@@ -56,7 +57,7 @@ function events:ADDON_LOADED(...)
 
 			JTS.soundPackList[addonName] = {
 				name = soundPackName,
-				version = GetAddOnMetadata(addonName, 'Version') or 0
+				version = C_AddOns.GetAddOnMetadata(addonName, 'Version') or 0
 			}
 		end
 	end
@@ -88,8 +89,8 @@ end
 --刷新soundPackList
 JTS_RefreshSoundPackList = JTS_RefreshSoundPackList or function()
 	local count = 0
-	for k, v in pairs(JTS.soundPackList) do
-		if not IsAddOnLoaded(k) then 
+	for k, _ in pairs(JTS.soundPackList) do
+		if not C_AddOns.IsAddOnLoaded(k) then 
 			JTS.soundPackList[k] = nil
 		else
 			count = count + 1
@@ -106,8 +107,8 @@ JTS_SlashCommandHandler = JTS_SlashCommandHandler or function(msg)
 		--先用空格拆分指令
 		if JTS_SplitString(command," ") then
 			--有前缀指令
-			local command, pre1, pre2, pre3 = JTS_CmdSplit(command," ")
-			JTS_Print("|CFFFF0000Pre1: |R"..tostring(pre1).." |CFFFF0000Pre2: |R"..(pre2 or "|CFF7D7D7D"..tostring(pre2).."|R").." |CFFFF0000Pre3: |R"..(pre3 or "|CFF7D7D7D"..tostring(pre3).."|R").." |CFFFF0000Cmd: |R"..command)
+			local command, pre1, pre2, pre3 = JTS_CmdSplit(command)
+			JTS_Print("|CFFFF0000Pre1: |R"..tostring(pre1).." |CFFFF0000Pre2: |R"..(pre2 or ("|CFF7D7D7D"..tostring(pre2).."|R")).." |CFFFF0000Pre3: |R"..(pre3 or ("|CFF7D7D7D"..tostring(pre3).."|R")).." |CFFFF0000Cmd: |R"..command)
 			if pre1 == "w" and command ~= "" and command ~= nil then
 				JTS_SendResponseMessage(nil,nil,"WHISPER",command)
 			end
@@ -146,7 +147,7 @@ local regPrefix = function()
         ["JTECHECK"] = true,
         ["JTECHECKRESPONSE"] = true,
     }
-    for k,v in pairs(prefixList) do
+    for k, _ in pairs(prefixList) do
         local successfulRequest = C_ChatInfo.RegisterAddonMessagePrefix(k)
     end
 end
@@ -194,24 +195,24 @@ JTS_ReceiveStealthMSG = JTS_ReceiveStealthMSG or function(prefix, text, channel,
         ["JTEPARTY"] = "PARTY"
     }
     if prefix == "JTECHECK" then
-		local sourceName = JTS_SplitString(sender,"-") and JTS_SplitString(sender,"-") or sender
 		if text == "soundpack" then
 			JTS_SendResponseMessage(nil,nil,channel,nil)
 		end
 	elseif prefix == "JTETTS" then
-		local sourceName = JTS_SplitString(sender,"-") and JTS_SplitString(sender,"-") or sender
 		local name, msg = JTS_SplitString(text, ":")
-		local channel = "TTS"
-        if name == string.lower(UnitName("player")) or name == "all" then
-            C_VoiceChat.SpeakText(0, msg, 0, 2, 100)
-        end
+		if msg then
+			if name == string.lower(UnitName("player")) or name == "all" then
+				C_VoiceChat.SpeakText(0, msg, 0, 2, 100)
+			end
+		end
 	elseif convertChannel[prefix] then
-		local sourceName = JTS_SplitString(sender,"-") and JTS_SplitString(sender,"-") or sender
 		local name, msg = JTS_SplitString(text, ":")
 		local channel = convertChannel[prefix]
-        if name == string.lower(UnitName("player")) or name == "all" then
-            SendChatMessage(msg, channel, nil,nil)
-        end
+		if msg then
+			if name == string.lower(UnitName("player")) or name == "all" then
+				SendChatMessage(msg, channel, nil,nil)
+			end
+		end
 	end
 end
 
@@ -221,7 +222,7 @@ JTS_ListPlayedCount = JTS_ListPlayedCount or function()
 		JTS_Print("==== "..date("%H:%M:%S %Y").." ====")
 		local index = 1
 		local totalCount = 0
-		for key,value in pairs(JTSDB.playedCount) do
+		for key, _ in pairs(JTSDB.playedCount) do
 			local text = "|CFFFF0000#: |R|CFFFFFFFF"..index.."|R PC: |CFFFF53A2"..JTSDB.playedCount[key].count.."|R |CFF40FF40File: |R"..key
 			JTS_Print(text)
 			index = index + 1
@@ -243,7 +244,7 @@ JTS_ListUnplayableCount = JTS_ListUnplayableCount or function()
 		JTS_Print("==== "..date("%H:%M:%S %Y").." ====")
 		local index = 1
 		local totalCount = 0
-		for key,value in pairs(JTSDB.unplayableCount) do
+		for key, _ in pairs(JTSDB.unplayableCount) do
 			local text = "|CFFFF0000#: |R|CFFFFFFFF"..index.."|R UPC: |CFFFF53A2"..JTSDB.unplayableCount[key].count.."|R |CFF40FF40File: |R"..key
 			JTS_Print(text)
 			index = index + 1
@@ -283,8 +284,8 @@ end
 
 --JTS播放声音文件
 JTS_PlaySoundFile = JTS_PlaySoundFile or function(filePath,reqVersion)
-	reqVersion = reqVersion or tonumber(JTS.version)
-	local version = tonumber(JTS.version)
+	reqVersion = reqVersion or JTS.version
+	local version = JTS.version
 
 	if not filePath or filePath == "" then
 		JTS_Debug("filePath nil or ()")
@@ -439,7 +440,7 @@ JTS_CheckSoundPack = JTS_CheckSoundPack or function(mute)
 
 	local canplay, soundHandle = JTS.P("Common\\biubiubiu.ogg")
 	if canplay then
-		if mute then 
+		if soundHandle and mute then 
 			StopSound(soundHandle)
 		end
 		JTS.soundPack = true
