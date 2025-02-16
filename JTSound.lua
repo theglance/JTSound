@@ -65,8 +65,8 @@ end
 
 --收到JTE发出的检查消息就发送自己的语音包版本情况。
 function events:CHAT_MSG_ADDON(...)
-	local prefix, text, channel, sender, target, zoneChannelID, localID, name, instanceID = ...
-	JTS_ReceiveStealthMSG(prefix, text, channel, sender, target, zoneChannelID, localID, name, instanceID)
+	local prefix, text, channel, sender, target, zoneChannelID, localID, channelName, instanceID = ...
+	JTS_ReceiveStealthMSG(prefix, text, channel, sender, target, zoneChannelID, localID, channelName, instanceID)
 end
 
 function events:PLAYER_ENTERING_WORLD(...)
@@ -154,7 +154,7 @@ end
 regPrefix()
 
 --StealthCheckResponseMSG
-JTS_SendResponseMessage = JTS_SendResponseMessage or function(msg,prefix,channel,targetname)
+JTS_SendResponseMessage = JTS_SendResponseMessage or function(msg,prefix,channel,targetName)
 	--pre1:传输频道 pre2:发言频道 pre3:谁
 	if not msg then 
 		msg = "|CFFFF53A2"..JTS.addonPath.."|R Ver: "..JTS.version.." SP: "..( JTS.soundPack and "|CFFFF53A2OK!|R" or "|CFFFF0000ERROR!|R" )
@@ -163,7 +163,7 @@ JTS_SendResponseMessage = JTS_SendResponseMessage or function(msg,prefix,channel
 		prefix = "JTECHECKRESPONSE"
 	end
 
-	if channel == "WHISPER" and ( targetname == "" or targetname == nil ) then
+	if channel == "WHISPER" and ( targetName == "" or targetName == nil ) then
 		JTS_Print("Whisper name error!")
 		return
 	end
@@ -181,13 +181,13 @@ JTS_SendResponseMessage = JTS_SendResponseMessage or function(msg,prefix,channel
 	end
 
 	if msg and channel then
-		C_ChatInfo.SendAddonMessage(prefix, msg, channel,targetname)
+		C_ChatInfo.SendAddonMessage(prefix, msg, channel,targetName)
 	end
 	return
 end
 
 --StealthMSG
-JTS_ReceiveStealthMSG = JTS_ReceiveStealthMSG or function(prefix, text, channel, sender, target, zoneChannelID, localID, name, instanceID)
+JTS_ReceiveStealthMSG = JTS_ReceiveStealthMSG or function(prefix, text, channel, sender, target, zoneChannelID, localID, channelName, instanceID)
     local convertChannel = {
         ["JTESAY"] = "SAY",
         ["JTEGUILD"] = "GUILD",
@@ -285,7 +285,7 @@ end
 --JTS播放声音文件
 JTS_PlaySoundFile = JTS_PlaySoundFile or function(filePath,reqVersion)
 	reqVersion = reqVersion or JTS.version
-	local version = JTS.version
+	local currentVersion = JTS.version
 
 	if not filePath or filePath == "" then
 		JTS_Debug("filePath nil or ()")
@@ -316,22 +316,22 @@ JTS_PlaySoundFile = JTS_PlaySoundFile or function(filePath,reqVersion)
 							JTS.alertNewVersion = false
 						else
 							--JTS有，但是播放文件失败，说明文件缺失或者版本低
-							if reqVersion > version and JTS.alertNewVersion then
+							if reqVersion > currentVersion and JTS.alertNewVersion then
 								JTS_Print("没有找到音频文件，请更新|CFFFF53A2JTSound|R语音插件版本 |CFFFF53A2"..reqVersion)
 								JTS.alertNewVersion = false
 							end
-							if reqVersion <= version and JTS.alertFileMissing then
+							if reqVersion <= currentVersion and JTS.alertFileMissing then
 								JTS_Print("音频文件缺失，请重新安装|CFFFF53A2JTSound|R语音插件")
 								JTS.alertFileMissing = false
 							end
 						end
 					end
 				else
-					if reqVersion > version and JTS.alertNewVersion then
+					if reqVersion > currentVersion and JTS.alertNewVersion then
 						JTS_Print("没有找到音频文件，请更新|CFFFF53A2JTSound|R语音插件版本 |CFFFF53A2"..reqVersion)
 						JTS.alertNewVersion = false
 					end
-					if reqVersion <= version and JTS.alertFileMissing then
+					if reqVersion <= currentVersion and JTS.alertFileMissing then
 						JTS_Print("音频文件缺失，请重新安装|CFFFF53A2JTSound|R语音插件")
 						JTS.alertFileMissing = false
 					end
