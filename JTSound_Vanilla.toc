@@ -6,7 +6,7 @@
 ## Notes-zhCN: |CFF666666By Jettie@SMTH|R|N|CFF33AAFFJTSound|R|N|CFF8FFFA2都是为了支持WA所需的语音文件|N插件不需要设置
 ## X-SoundPackName: JT默认语音包
 
-## Version: 15
+## Version: 16
 ## SavedVariables: JTSDB
 
 JTSound.lua
