@@ -298,12 +298,14 @@ JTS_PlaySoundFile = JTS_PlaySoundFile or function(filePath,reqVersion)
 			local canplay, soundHandle = PlaySoundFile(fullPath, "Master")
 			if not canplay then
 				--tryPlay JT default soundpack if JTSound available
-				if GetCVar("Sound_EnableAllSound") ~= "1" and (not JTS.Spam["ENABLE_SOUND"] or GetTime() > JTS.Spam["ENABLE_SOUND"]) then
-					JTS_Print("JTS语音包需要游戏开启声效: |CFFFF53A2Esc|R-|CFFFF53A2选项|R-|CFFFF53A2音频|R-|CFFFF53A2开启声效|R")
-					if not JTS.Spam["ENABLE_SOUND"] then
-						JTS.Spam["ENABLE_SOUND"] = GetTime() + 10
-					else
-						JTS.Spam["ENABLE_SOUND"] = GetTime() + 180
+				if GetCVar("Sound_EnableAllSound") ~= "1" then
+					if (not JTS.Spam["ENABLE_SOUND"] or GetTime() > JTS.Spam["ENABLE_SOUND"]) then
+						JTS_Print("语音包需要游戏开启声效: |CFFFF53A2Esc|R-|CFFFF53A2选项|R-|CFFFF53A2音频|R-|CFFFF53A2开启声效|R")
+						if not JTS.Spam["ENABLE_SOUND"] then
+							JTS.Spam["ENABLE_SOUND"] = GetTime() + 10
+						else
+							JTS.Spam["ENABLE_SOUND"] = GetTime() + 180
+						end
 					end
 				elseif JTS.addonPath ~= JTS.DefaultSoundPack then 
 					path = ([[Interface\AddOns\%s\Sound\]]):format(JTS.DefaultSoundPack)
@@ -311,19 +313,14 @@ JTS_PlaySoundFile = JTS_PlaySoundFile or function(filePath,reqVersion)
 					--tryPlay other soundpack
 					canplay, soundHandle = PlaySoundFile(fullPath, "Master")
 					if not canplay then
-						if GetCVar("Sound_EnableAllSound") ~= "1" then
-							JTS_Print("语音包需要游戏开启声效: |CFFFF53A2Esc|R-|CFFFF53A2设置|R-|CFFFF53A2音频|R-|CFFFF53A2开启声效|R"..reqVersion)
+						--JTS有，但是播放文件失败，说明文件缺失或者版本低
+						if reqVersion > currentVersion and JTS.alertNewVersion then
+							JTS_Print("没有找到音频文件，请更新|CFFFF53A2JTSound|R语音插件版本 |CFFFF53A2"..reqVersion)
 							JTS.alertNewVersion = false
-						else
-							--JTS有，但是播放文件失败，说明文件缺失或者版本低
-							if reqVersion > currentVersion and JTS.alertNewVersion then
-								JTS_Print("没有找到音频文件，请更新|CFFFF53A2JTSound|R语音插件版本 |CFFFF53A2"..reqVersion)
-								JTS.alertNewVersion = false
-							end
-							if reqVersion <= currentVersion and JTS.alertFileMissing then
-								JTS_Print("音频文件缺失，请重新安装|CFFFF53A2JTSound|R语音插件")
-								JTS.alertFileMissing = false
-							end
+						end
+						if reqVersion <= currentVersion and JTS.alertFileMissing then
+							JTS_Print("音频文件缺失，请重新安装|CFFFF53A2JTSound|R语音插件")
+							JTS.alertFileMissing = false
 						end
 					end
 				else
@@ -446,8 +443,12 @@ JTS_CheckSoundPack = JTS_CheckSoundPack or function(mute)
 		JTS.soundPack = true
 		text = "|CFFFF53A2Perfect!|R |CFF8FFFA2检测到语音包 当前使用|R: |CFFFF53A2"..(JTS.addonPath or "")
 	else
-		JTS.soundPack = false
-		text = "|CFFFFE0B0未找到语音包|R，请检查语音文件或者重新下载安装|CFFFF53A2JTSound|R|R"
+		if GetCVar("Sound_EnableAllSound") ~= "1" then
+			text = "语音包需要游戏开启声效: |CFFFF53A2Esc|R-|CFFFF53A2选项|R-|CFFFF53A2音频|R-|CFFFF53A2开启声效|R"
+		else
+			JTS.soundPack = false
+			text = "|CFFFFE0B0未找到语音包|R，请检查语音文件或者重新下载安装|CFFFF53A2JTSound|R|R"
+		end
 	end
 
 	if not JTS.checkedSP then
