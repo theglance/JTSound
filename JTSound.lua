@@ -120,13 +120,13 @@ JTS_SlashCommandHandler = JTS_SlashCommandHandler or function(msg)
 				JTS_ToggleCounting()
 			elseif( command == "debug" ) then
 				JTS_ToggleDebug()
-			elseif( command == "listpc" ) then
+			elseif( command == "listpc" or command == "lpc" ) then
 				JTS_ListPlayedCount()
-			elseif( command == "resetpc" ) then
+			elseif( command == "resetpc" or command == "rpc" ) then
 				JTS_PlayedCountReset()
-			elseif( command == "listupc" ) then
+			elseif( command == "listupc" or command == "lupc" ) then
 				JTS_ListUnplayableCount()
-			elseif( command == "resetupc" ) then
+			elseif( command == "resetupc" or command == "rupc" ) then
 				JTS_UnplayableCountReset()
 			else
 				JTS_CheckSoundPack()
